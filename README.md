@@ -1,2 +1,2 @@
 # ADCP
-Dedicated Architectures for Parallel Computing
+Homework for Dedicated Architectures for Parallel Computing
