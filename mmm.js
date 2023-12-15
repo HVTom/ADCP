@@ -1,10 +1,10 @@
-const a = [
+const matrixA = [
   [1, 2, 3, 0, 0],
   [0, 4, 5, 6, 0],
   [0, 0, 7, 8, 9]
 ];
 
-const b = [
+const matrixB = [
   [1, 0, 0],
   [2, 4, 0],
   [3, 5, 7],
@@ -12,65 +12,61 @@ const b = [
   [0, 0, 9]
 ];
 
-const cells = Array.from({ length: a.length }, () =>
-  Array.from({ length: b[0].length }, () => ({ c: 0, ain: 0, bin: 0, aout: 0, bout: 0 }))
+const register = Array.from({ length: matrixA.length }, () =>
+  Array.from({ length: matrixB[0].length }, () => ({ val: 0, Ain: 0, Bin: 0, Aout: 0, Bout: 0 }))
 );
 
-let inputIndex = 0;
+let vectorIndex = 0;
+
+const colorize = (text, colorCode) => `\x1b[${colorCode}m${text}\x1b[0m`;
 
 function step() {
-  // Propagate input from matrix a
-  for (let i = 0; i < cells.length; ++i) {
-    for (let j = 0; j < cells[0].length; ++j) {
-      if (j === 0) {
-        cells[i][j].ain = inputIndex < a[i].length ? a[i][inputIndex] : 0;
+  // Propagate matrixA
+  for (let i = 0; i < register.length; i++) { //0 1 2
+    for (let j = 0; j < register[0].length; j++) { // 0...4
+      if (j == 0) {
+        register[i][j].Ain = vectorIndex < matrixA[i].length ? matrixA[i][vectorIndex] : 0;
       } else {
-        cells[i][j].ain = cells[i][j - 1].aout;
+        register[i][j].Ain = register[i][j - 1].Aout;
       }
     }
   }
 
-  // Propagate input from matrix b
-  for (let i = 0; i < cells.length; ++i) {
-    for (let j = 0; j < cells[0].length; ++j) {
-      if (i === 0) {
-        cells[i][j].bin = inputIndex < b.length ? b[inputIndex][j] : 0;
+  // Propagate matrixB
+  for (let i = 0; i < register.length; i++) {
+    for (let j = 0; j < register[0].length; j++) {
+      if (i == 0) {
+        register[i][j].Bin = vectorIndex < matrixB.length ? matrixB[vectorIndex][j] : 0;
       } else {
-        cells[i][j].bin = cells[i - 1][j].bout;
+        register[i][j].Bin = register[i - 1][j].Bout;
       }
     }
   }
 
-  for (let i = 0; i < cells.length; ++i) {
-    for (let j = 0; j < cells[0].length; ++j) {
-      cells[i][j].c += cells[i][j].ain * cells[i][j].bin;
-      cells[i][j].aout = cells[i][j].ain;
-      cells[i][j].bout = cells[i][j].bin;
+  for (let i = 0; i < register.length; i++) {
+    for (let j = 0; j < register[0].length; j++) {
+      register[i][j].val += register[i][j].Ain * register[i][j].Bin;
+      register[i][j].Aout = register[i][j].Ain;
+      register[i][j].Bout = register[i][j].Bin;
     }
   }
 
-  ++inputIndex;
+  vectorIndex++;
 }
 
-console.log("Matrix A is");
-a.forEach(row => console.log(row.join(" ")));
-
-console.log("\nMatrix B is");
-b.forEach(row => console.log(row.join(" ")));
-
-for (let stepIndex = 0; stepIndex < a.length + b.length - 1; ++stepIndex) {
-  console.log(`\nStep ${stepIndex + 1}:`);
+// m + n - 1 steps
+for (let stepIndex = 0; stepIndex < matrixA.length + matrixB.length - 1; stepIndex++) {
+  console.log(colorize(`\nStep ${stepIndex + 1}:`, 33));
   step();
 
-  for (let i = 0; i < cells.length; ++i) {
-    for (let j = 0; j < cells[0].length; ++j) {
-      console.log(`c: ${cells[i][j].c}, ain: ${cells[i][j].ain}, bin: ${cells[i][j].bin}`);
+  for (let i = 0; i < register.length; i++) {
+    for (let j = 0; j < register[0].length; j++) {
+      console.log(`val: ${register[i][j].val}, Ain: ${register[i][j].Ain}, Bin: ${register[i][j].Bin}`);
     }
     console.log("");
   }
 }
 
 
-// Display the final matrix
-console.log("\nFinal Matrix is");
-cells.forEach(row => console.log(row.map(cell => cell.c).join(" ")));
+console.log(colorize("\nResult: ", 33));
+register.forEach(row => console.log(row.map(cell => cell.val).join(" ")));
